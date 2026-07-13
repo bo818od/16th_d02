@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>김보경 | 브랜딩 포트폴리오</title>
+    
+    <!-- 프리텐다드 고딕 폰트 로드 -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    
+    <style>
+        @font-face {
+            font-family: 'BookkMyungjo';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.0/BookkMyungjo-Lt.woff2') format('woff2');
+            font-weight: 400;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'BookkMyungjo';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.0/BookkMyungjo-Bd.woff2') format('woff2');
+            font-weight: 700;
+            font-display: swap;
+        }
+
+        :root {
+            /* 라이트 모드 (기본 테마) */
+            --bg-color: #f5f5f8;
+            --surface-color: #ffffff;
+            --main-accent: #8681b1; /* 보경님 지정 메인 인디고 라벤더 */
+            --main-accent-hover: #716ba3;
+            --text-main: #1e1e26;
+            --text-sub: #5c5c6d;
+            --border-color: #e0e0e8;
+            --active-bg: rgba(134, 129, 177, 0.1);
+        }
+
+        html.dark-mode {
+            /* 다크 모드 */
+            --bg-color: #121216;
+            --surface-color: #1c1c24;
+            --main-accent: #a5a1ce;
+            --main-accent-hover: #b9b5e0;
+            --text-main: #F5F5DC; /* 포근한 웜샌드 */
+            --text-sub: #9e9eb0;
+            --border-color: #2e2e3a;
+            --active-bg: rgba(165, 161, 206, 0.15);
+        }
+
+        /* 공통 초기화 - 완벽히 각진(0px) 사각형 레이아웃 전제 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            border-radius: 0px !important; /* 모든 둥근 모서리 강제 해제 */
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            font-family: 'Pretendard', sans-serif;
+        }
+
+        #intro-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .curtain {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background-color: #0c0c0e;
+            transition: transform 1.2s cubic-bezier(0.85, 0, 0.15, 1);
+        }
+
+        .curtain-top {
+            top: 0;
+            border-bottom: 1px solid rgba(134, 129, 177, 0.2);
+        }
+
+        .curtain-bottom {
+            bottom: 0;
+            border-top: 1px solid rgba(134, 129, 177, 0.2);
+        }
+
+        #countdown-number {
+            font-family: 'BookkMyungjo', serif;
+            font-weight: 700;
+            font-size: 7.5rem;
+            color: #ffffff;
+            z-index: 10000;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            text-shadow: 0 0 35px rgba(134, 129, 177, 0.7);
+        }
+
+        /* 쪼개져 열리는 스크린 효과 */
+        #intro-screen.split .curtain-top {
+            transform: translateY(-100%);
+        }
+
+        #intro-screen.split .curtain-bottom {
+            transform: translateY(100%);
+        }
+
+        /* 가로로 열릴 때 카운트다운 숫자는 즉각 소멸 */
+        #intro-screen.split #countdown-number {
+            opacity: 0;
+            transform: scale(0.5);
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            background-color: var(--bg-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        /* 테마 컨트롤러 버튼 - 완전히 각진 사각형 */
+        .theme-controller {
+            display: flex;
+            background-color: var(--border-color);
+            padding: 4px;
+        }
+
+        .theme-btn {
+            background: none;
+            border: none;
+            padding: 6px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            cursor: pointer;
+            transition: color 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        /* 테마 버튼 전용 잠금해제형 호버 슬라이드 레이어 */
+        .theme-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -101%;
+            width: 100%;
+            height: 100%;
+            background-color: var(--active-bg);
+            z-index: -1;
+            transition: left 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .theme-btn:not(.active):hover::before {
+            left: 0;
+        }
+
+        .theme-btn.active {
+            background-color: var(--main-accent);
+            color: #ffffff;
+        }
+
+        /* 네비게이션 탭 버튼 - 슬라이드 효과 탑재 */
+        .nav-menu {
+            display: flex;
+            gap: 5px;
+        }
+
+        .nav-tab {
+            background: none;
+            border: none;
+            padding: 10px 18px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            transition: color 0.3s ease;
+        }
+
+        /* 호버 시 왼쪽에서 배경이 깔리는 잠금해제 연출 */
+        .nav-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -101%;
+            width: 100%;
+            height: 100%;
+            background-color: var(--active-bg);
+            z-index: -1;
+            transition: left 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .nav-tab:not(.active):hover::before {
+            left: 0;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-main);
+        }
+
+        .nav-tab.active {
+            color: var(--main-accent);
+            font-weight: 700;
+            border-bottom: 2px solid var(--main-accent);
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 140px 20px 80px 20px;
+            max-width: 850px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .section-content {
+            display: none;
+            width: 100%;
+            animation: cinematicAppear 0.5s ease-out forwards;
+        }
+
+        .section-content.active {
+            display: block;
+        }
+
+        @keyframes cinematicAppear {
+            from { opacity: 0; transform: scale(0.98) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* ① 오프닝 섹션 - 부크크 명조 전면 사용 */
+        .opening-box {
+            text-align: center;
+            padding: 30px 0;
+            font-family: 'BookkMyungjo', serif;
+        }
+
+        .hero-title {
+            font-size: 2.1rem;
+            font-weight: 700; /* Bold 700 */
+            line-height: 1.6;
+            margin-bottom: 30px;
+            word-break: keep-all;
+            color: var(--text-main);
+        }
+
+        /* 보경님 시그니처 네임 브랜딩 포인트 컬러 처리 */
+        .name-accent {
+            color: var(--main-accent) !important;
+            font-weight: 700;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            font-weight: 400; /* Regular 400 */
+            color: var(--text-sub);
+            line-height: 1.8;
+            max-width: 650px;
+            margin: 0 auto;
+            word-break: keep-all;
+        }
+
+        /* ② 성향 & ③ 취향/역량 공통 아코디언 스타일 */
+        .section-title {
+            font-family: 'BookkMyungjo', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .section-title span {
+            color: var(--main-accent);
+        }
+
+        .intro-text {
+            font-size: 0.95rem;
+            text-align: center;
+            margin-bottom: 35px;
+            color: var(--text-sub);
+            font-weight: 300;
+        }
+
+        .caption-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .caption-item {
+            border: 1px solid var(--border-color);
+            background-color: var(--surface-color);
+            overflow: hidden;
+            transition: border-color 0.3s ease;
+        }
+
+        .caption-header {
+            width: 100%;
+            background: none;
+            border: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 22px 25px;
+            text-align: left;
+            cursor: pointer;
+            color: var(--text-main);
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        /* 아코디언 헤더 호버 시 슬라이드 해제 연출 */
+        .caption-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -101%;
+            width: 100%;
+            height: 100%;
+            background-color: var(--active-bg);
+            z-index: -1;
+            transition: left 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .caption-header:hover::before {
+            left: 0;
+        }
+
+        .caption-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .caption-emoji {
+            font-size: 1.3rem;
+        }
+
+        .caption-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .caption-arrow {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            transition: transform 0.3s ease;
+        }
+
+        .caption-item.open {
+            border-color: var(--main-accent);
+        }
+
+        .caption-item.open .caption-arrow {
+            transform: rotate(180deg);
+            color: var(--main-accent);
+        }
+
+        .caption-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            background-color: rgba(134, 129, 177, 0.01);
+        }
+
+        .caption-text {
+            padding: 0 25px 25px 63px;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            font-weight: 300;
+            color: var(--text-sub);
+            word-break: keep-all;
+        }
+
+        /* ④ 엔딩 크레딧 섹션 */
+        .credit-box {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .credit-list {
+            max-width: 450px;
+            margin: 0 auto 50px auto;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 35px 0;
+        }
+
+        .credit-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        .credit-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .credit-label {
+            color: var(--text-sub);
+            font-weight: 400;
+        }
+
+        .credit-val {
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 32px;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            transition: color 0.3s ease, border-color 0.3s ease;
+        }
+
+        /* 채워지는 슬라이딩 인터랙션 */
+        .btn-filled {
+            background-color: var(--main-accent);
+            color: #ffffff;
+            border: 1px solid var(--main-accent);
+        }
+
+        .btn-filled::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -101%;
+            width: 100%;
+            height: 100%;
+            background-color: var(--main-accent-hover);
+            z-index: -1;
+            transition: left 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .btn-filled:hover::before {
+            left: 0;
+        }
+
+        .btn-outline {
+            border: 1px solid var(--border-color);
+            background-color: var(--surface-color);
+            color: var(--text-main);
+        }
+
+        .btn-outline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -101%;
+            width: 100%;
+            height: 100%;
+            background-color: var(--active-bg);
+            z-index: -1;
+            transition: left 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .btn-outline:hover::before {
+            left: 0;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--main-accent);
+            color: var(--main-accent);
+        }
+
+        /* 하단 고정 스텝 컨트롤러 */
+        .step-navigator {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 60px;
+            padding-top: 25px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .step-btn {
+            background: none;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--main-accent);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .step-btn:disabled {
+            color: var(--text-sub);
+            opacity: 0.25;
+            cursor: not-allowed;
+        }
+
+        footer {
+            text-align: center;
+            padding: 35px 20px;
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            border-top: 1px solid var(--border-color);
+            margin-top: auto;
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                align-items: center;
+                padding: 15px;
+            }
+
+            .nav-menu {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .nav-tab {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+
+            .hero-title {
+                font-size: 1.6rem;
+                line-height: 1.5;
+            }
+
+            .hero-subtitle {
+                font-size: 0.95rem;
+            }
+
+            .caption-text {
+                padding-left: 25px;
+            }
+
+            #countdown-number {
+                font-size: 5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 3-2-1 시네마 오프닝 레이어 -->
+    <div id="intro-screen">
+        <div class="curtain curtain-top"></div>
+        <div class="curtain curtain-bottom"></div>
+        <div id="countdown-number">3</div>
+    </div>
+
+    <header>
+        <div class="nav-container">
+            <!-- 테마 버튼 ('밝게' 모드가 왼쪽으로 우선 오도록 순서 재조정) -->
+            <div class="theme-controller">
+                <button class="theme-btn active" id="theme-light" onclick="setTheme('light')">밝게</button>
+                <button class="theme-btn" id="theme-dark" onclick="setTheme('dark')">어둡게</button>
+            </div>
+
+            <!-- 네비게이션 탭 -->
+            <div class="nav-menu">
+                <button class="nav-tab active" onclick="switchSection('opening', 0)">오프닝</button>
+                <button class="nav-tab" onclick="switchSection('disposition', 1)">성향</button>
+                <button class="nav-tab" onclick="switchSection('insight', 2)">취향/역량</button>
+                <button class="nav-tab" onclick="switchSection('credits', 3)">엔딩 크레딧</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- ① 오프닝 섹션 -->
+        <section id="opening" class="section-content active">
+            <div class="opening-box">
+                <h1 class="hero-title">
+                    어둠 속에서 반짝임을 찾는 사람,<br>
+                    영화와 사람을 사랑하는 <span class="name-accent">김보경</span>입니다.
+                </h1>
+                <p class="hero-subtitle">
+                    삶이라는 영화 속에서 날카로운 분석보다 더 값진<br>'무해한 온기'를 나누고 싶습니다.
+                </p>
+            </div>
+            
+            <div class="step-navigator">
+                <button class="step-btn" disabled>이전</button>
+                <button class="step-btn" onclick="switchSection('disposition', 1)">다음 성향 보기 &rarr;</button>
+            </div>
+        </section>
+
+        <!-- ② 성향 섹션 -->
+        <section id="disposition" class="section-content">
+            <h2 class="section-title"><span class="name-accent">김보경</span>의 성향</h2>
+            <p class="intro-text">키워드를 클릭하면 세부 기록이 슬라이드 다운됩니다.</p>
+            
+            <div class="caption-group">
+                <div class="caption-item">
+                    <button class="caption-header" onclick="toggleAccordion(this)">
+                        <div class="caption-title-wrap">
+                            <span class="caption-emoji">☀️</span>
+                            <span class="caption-title">따뜻한 시선</span>
+                        </div>
+                        <span class="caption-arrow">▼</span>
+                    </button>
+                    <div class="caption-content">
+                        <div class="caption-text">
+                            선입견이라는 필터를 완전하게 걷어내고, 타인이 가진 고유의 장점, 그리고 숨겨진 가장 긍정적인 이야기들을 먼저 발견하여 세상을 비춥니다.
+                        </div>
+                    </div>
+                </div>
+                <div class="caption-item">
+                    <button class="caption-header" onclick="toggleAccordion(this)">
+                        <div class="caption-title-wrap">
+                            <span class="caption-emoji">🔮</span>
+                            <span class="caption-title">깊은 내면세계</span>
+                        </div>
+                        <span class="caption-arrow">▼</span>
+                    </button>
+                    <div class="caption-content">
+                        <div class="caption-text">
+                            판타지 영화가 안겨주는 광활한 모험과 상상력을 사랑합니다. 기발한 아이디어들을 INTP 특유의 이성적인 사색 능력과 조화롭게 정돈하며 내면을 채웁니다.
+                        </div>
+                    </div>
+                </div>
+                <div class="caption-item">
+                    <button class="caption-header" onclick="toggleAccordion(this)">
+                        <div class="caption-title-wrap">
+                            <span class="caption-emoji">🎬</span>
+                            <span class="caption-title">높은 몰입도</span>
+                        </div>
+                        <span class="caption-arrow">▼</span>
+                    </button>
+                    <div class="caption-content">
+                        <div class="caption-text">
+                            불 꺼진 상영관에서 은막에 집중하듯, 한 번 마음을 쏟기 시작한 공동의 기획이나 마주한 인간관계에 대단히 깊고 끈질기게 몰입하는 에너지를 가졌습니다.
+                        </div>
+                    </div>
+                </div>
+                <div class="caption-item">
+                    <button class="caption-header" onclick="toggleAccordion(this)">
+                        <div class="caption-title-wrap">
+                            <span class="caption-emoji">💜</span>
+                            <span class="caption-title">반전의 다정함</span>
+                        </div>
+                        <span class="caption-arrow">▼</span>
+                    </button>
+                    <div class="caption-content">
+                        <div class="caption-text">
+                            독립적이고 분석적인 지적 자아 저변에는, 사람들의 이야기에 깊이 공감하고 궁극적으로 온기 넘치는 연대를 이어내려는 상냥하고 선량한 신뢰가 들어차 있습니다.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-navigator">
+                <button class="step-btn" onclick="switchSection('opening', 0)">&larr; 이전으로</button>
+                <button class="step-btn" onclick="switchSection('insight', 2)">다음 인사이트 보기 &rarr;</button>
+            </div>
+        </section>
+
+        <!-- ③ 취향/역량 섹션 -->
+        <section id="insight" class="section-content">
+            <h2 class="section-title">스크린에서 발견한 인사이트</h2>
+            <p class="intro-text">완전한 암전의 공간에서 발견한 영화적 기록이자 일과 삶을 지탱하는 생각들입니다.</p>
+
+            <div class="caption-group">
+                <div class="caption-item">
+                    <button class="caption-header" onclick="toggleAccordion(this)">
+                        <div class="caption-title-wrap">
+                            <span class="caption-emoji">🌌</span>
+                            <span class="caption-title">판타지가 주는 위로</span>
+                        </div>
+                        <span class="caption-arrow">▼</span>
+                    </button>
+                    <div class="caption-content">
+                        <div class="caption-text">
+                            현실의 물리적인 한계를 뛰어넘는 무구한 상상력은 단순한 영감의 재료를 넘어, 세상을 훨씬 풍성하고 온화한 필터로 투영하게 돕는 귀중한 위로가 됩니다.
+                        </div>
+                    </div>
+                </div>
+                <div class="caption-item">
+                    <button class="caption-header" onclick="toggleAccordion(this)">
+                        <div class="caption-title-wrap">
+                            <span class="caption-emoji">👥</span>
+                            <span class="caption-title">사람과 사람의 시퀀스</span>
+                        </div>
+                        <span class="caption-arrow">▼</span>
+                    </button>
+                    <div class="caption-content">
+                        <div class="caption-text">
+                            서로 다른 온도를 지닌 주연과 조연들이 부딪히고 연결되는 과정처럼, 공동체 속 어긋난 결을 부드럽게 봉합하고 사람을 잇는 단단한 가교 역할을 설계해 갑니다.
+                        </div>
+                    </div>
+                </div>
+                <div class="caption-item">
+                    <button class="caption-header" onclick="toggleAccordion(this)">
+                        <div class="caption-title-wrap">
+                            <span class="caption-emoji">✏️</span>
+                            <span class="caption-title">몰입의 기록물</span>
+                        </div>
+                        <span class="caption-arrow">▼</span>
+                    </button>
+                    <div class="caption-content">
+                        <div class="caption-text">
+                            스크린의 연출 의도와 미장센을 세심히 해부하듯 주어지는 일과 기획을 면밀하게 쪼개고 검증하여, 결과물의 사소한 디테일까지 정교하게 다듬어 신뢰를 확보합니다.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-navigator">
+                <button class="step-btn" onclick="switchSection('disposition', 1)">&larr; 이전으로</button>
+                <button class="step-btn" onclick="switchSection('credits', 3)">엔딩 크레딧 확인 &rarr;</button>
+            </div>
+        </section>
+
+        <!-- ④ 엔딩 크레딧 섹션 -->
+        <section id="credits" class="section-content">
+            <h2 class="section-title">ENDING CREDITS</h2>
+            <p class="intro-text">함께 새로운 이야기를 써 내려갈 분을 신중히 기다립니다.</p>
+            
+            <div class="credit-box">
+                <div class="credit-list">
+                    <div class="credit-row">
+                        <span class="credit-label">이름</span>
+                        <span class="credit-val"><span class="name-accent">김보경 (KIM BOKYEONG)</span></span>
+                    </div>
+                    <div class="credit-row">
+                        <span class="credit-label">WANTED</span>
+                        <span class="credit-val">잠재적 크루 & 협업 파트너</span>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <a href="mailto:your-email@example.com?subject=협업 제안 제의" class="btn-filled action-btn">프로젝트 제안하기</a>
+                    <a href="https://instagram.com/bo_818_od" target="_blank" rel="noopener noreferrer" class="btn-outline action-btn">취향 나누기 (SNS)</a>
+                </div>
+            </div>
+
+            <div class="step-navigator">
+                <button class="step-btn" onclick="switchSection('insight', 2)">&larr; 이전으로</button>
+                <button class="step-btn" disabled>처음</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- 푸터 단락 -->
+    <footer>
+        <p>© 2026 KIM BOKYEONG. ALL RIGHTS RESERVED.</p>
+    </footer>
+
+    <script>
+        let countdownInterval = null;
+        let audioContext = null;
+
+        // 1. Web Audio API를 활용한 '띠-' 소리 (Beep Sound) 생성 함수
+        function playBeep(frequency = 650, duration = 0.15) {
+            try {
+                // 사용자 제스처가 활성화되어 소리 엔진이 작동 가능한지 체크
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.type = 'sine'; // 부드러운 전파음 형태의 sine 파동 적용
+                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+
+                // 부드러운 볼륨 감소 설정
+                gainNode.gain.setValueAtTime(0.12, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + duration);
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + duration);
+            } catch (error) {
+                console.warn("AudioContext 비프음 출력 제한 우회 중: ", error);
+            }
+        }
+
+        // 2. 테마 스위처 함수 (라이트/다크 모드 제어)
+        function setTheme(mode) {
+            const htmlEl = document.documentElement;
+            const darkBtn = document.getElementById('theme-dark');
+            const lightBtn = document.getElementById('theme-light');
+
+            if (mode === 'dark') {
+                htmlEl.classList.add('dark-mode');
+                darkBtn.classList.add('active');
+                lightBtn.classList.remove('active');
+            } else {
+                htmlEl.classList.remove('dark-mode');
+                lightBtn.classList.add('active');
+                darkBtn.classList.remove('active');
+            }
+        }
+
+        // 3. 아웃라인 탭 전환 및 복귀 트랙 제어
+        function switchSection(sectionId, index) {
+            const sections = document.querySelectorAll('.section-content');
+            sections.forEach(sec => sec.classList.remove('active'));
+
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach((tab, i) => {
+                if (i === index) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+
+            // 어느 탭에서든 오프닝(Index 0) 탭으로 귀환하면 극장 카운트다운을 완벽히 비프음과 함께 재실행시킵니다.
+            if (sectionId === 'opening') {
+                runCinemaOpening();
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 4. 아코디언 컴포넌트 여닫기 인터랙션
+        function toggleAccordion(button) {
+            const item = button.parentElement;
+            const content = button.nextElementSibling;
+            const isOpen = item.classList.contains('open');
+
+            const allItems = item.parentElement.querySelectorAll('.caption-item');
+            allItems.forEach(i => {
+                i.classList.remove('open');
+                i.querySelector('.caption-content').style.maxHeight = null;
+            });
+
+            if (!isOpen) {
+                item.classList.add('open');
+                content.style.maxHeight = content.scrollHeight + "px";
+            } else {
+                item.classList.remove('open');
+                content.style.maxHeight = null;
+            }
+        }
+
+        // 5. 시네마 오프닝 카운트다운 구동 함수 (오프닝 복귀 시 트리거 지원)
+        function runCinemaOpening() {
+            const countdownEl = document.getElementById('countdown-number');
+            const introScreen = document.getElementById('intro-screen');
+            
+            // 기존 타이머 진행 중이었다면 제거
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            
+            // 인트로 엘리먼트 초기화
+            introScreen.style.display = 'flex';
+            introScreen.classList.remove('split');
+            countdownEl.textContent = '3';
+            countdownEl.style.opacity = '1';
+            countdownEl.style.transform = 'scale(1)';
+            
+            // 최초 '3' 숫자 표기와 함께 첫 비프음 재생
+            playBeep(650, 0.15);
+            
+            let count = 3;
+            countdownInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    // 카운트다운 숫자 변경 시 스케일 팝 효과 및 비프음 재생
+                    playBeep(650, 0.15);
+                    countdownEl.style.opacity = '0';
+                    countdownEl.style.transform = 'scale(1.4)';
+                    setTimeout(() => {
+                        countdownEl.textContent = count;
+                        countdownEl.style.opacity = '1';
+                        countdownEl.style.transform = 'scale(1)';
+                    }, 150);
+                } else {
+                    clearInterval(countdownInterval);
+                    
+                    // 마지막 0 시점에 띠- 소리가 나지 않도록 마감하며 가로 분할 시작 시 숫자를 완벽히 소멸시킴
+                    countdownEl.style.opacity = '0';
+                    countdownEl.style.transform = 'scale(0.5)';
+                    
+                    // 스크린이 위아래 가로로 쪼개지며 열리는 트리거
+                    introScreen.classList.add('split');
+                    
+                    // 완전히 열리면 레이어 자체를 정리하여 interaction에 무해하게 만듦
+                    setTimeout(() => {
+                        introScreen.style.display = 'none';
+                    }, 1200);
+                }
+            }, 1000);
+        }
+
+        // 첫 페이지 로드 시 오프닝 구동
+        window.addEventListener('DOMContentLoaded', () => {
+            runCinemaOpening();
+        });
+    </script>
+</body>
+</html>
