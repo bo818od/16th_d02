@@ -24,19 +24,19 @@
         }
 
         :root {
-            /* 라이트 모드 (기본 테마) */
-            --bg-color: #f5f5f8;
-            --surface-color: #ffffff;
+            /* 라이트 모드 (기본 테마) - 포근한 옐로우/크림톤 가미 */
+            --bg-color: #f7f3e8; /* 따뜻하고 부드러운 빈티지 아이보리 옐로우 */
+            --surface-color: #fdfaf2; /* 눈이 편안한 크림 미색 카드 */
             --main-accent: #8681b1; /* 보경님 지정 메인 인디고 라벤더 */
             --main-accent-hover: #716ba3;
-            --text-main: #1e1e26;
-            --text-sub: #5c5c6d;
-            --border-color: #e0e0e8;
+            --text-main: #242220; /* 포근한 웜 블랙 */
+            --text-sub: #655e58; /* 포근한 웜 그레이 */
+            --border-color: #e3decb; /* 부드러운 황동/크림 계열 경계선 */
             --active-bg: rgba(134, 129, 177, 0.1);
         }
 
         html.dark-mode {
-            /* 다크 모드 */
+            /* 다크 모드 - 앰버/골드 광원의 온기를 품은 다크 스페이스 */
             --bg-color: #121216;
             --surface-color: #1c1c24;
             --main-accent: #a5a1ce;
@@ -64,6 +64,107 @@
             flex-direction: column;
             overflow-x: hidden;
             font-family: 'Pretendard', sans-serif;
+        }
+
+        /* 클릭 방해 금지를 위해 pointer-events: none 처리 및 z-index 조절 */
+        .film-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9990;
+            pointer-events: none;
+            overflow: hidden;
+            background: radial-gradient(circle, rgba(253, 246, 219, 0.08) 0%, rgba(240, 222, 173, 0.04) 100%); /* 전체적으로 아주 은은한 옐로우/앰버 톤 필터 */
+        }
+
+        /* 1. 실시간 생성 노이즈 (불투명도를 0.02로 극도로 낮추고, 속도를 훨씬 차분하게 늦춤) */
+        .film-grain {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
+            opacity: 0.02; /* 0.07 -> 0.02로 대폭 축소하여 아주 미세한 입자감만 제공 */
+            animation: grainShift 1.5s steps(4) infinite; /* 0.8s -> 1.5s로 정적이게 변경 */
+        }
+
+        /* 2. 영화 영사기 불빛 흔들림 (Flicker 강도를 극소량으로 조절하여 눈 피로 제거) */
+        .film-flicker {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(245, 222, 179, 0.015); /* 옐로우톤 영사 광원 */
+            opacity: 0.03; /* 0.1 -> 0.03으로 자극성 제어 */
+            animation: filmFlicker 0.4s infinite; /* 부드럽게 일렁이도록 지연 시간 확보 */
+        }
+
+        /* 3. 영사기 세로 스크래치 선 (투명도를 낮춰 장식 수준으로 억제) */
+        .film-scratches {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.04; /* 0.12 -> 0.04로 거슬림 최소화 */
+        }
+
+        .film-scratches::before,
+        .film-scratches::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 1px;
+            height: 100%;
+            background-color: var(--text-main);
+            opacity: 0;
+        }
+
+        .film-scratches::before {
+            animation: scratchRunA 6s steps(4) infinite;
+        }
+
+        .film-scratches::after {
+            animation: scratchRunB 8s steps(5) infinite;
+        }
+
+        /* 낡은 필름지 텍스처용 키프레임 애니메이션 */
+        @keyframes grainShift {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-2%, -4%); }
+            30% { transform: translate(3%, -9%); }
+            50% { transform: translate(-6%, 5%); }
+            70% { transform: translate(8%, -2%); }
+            90% { transform: translate(-3%, 7%); }
+        }
+
+        @keyframes filmFlicker {
+            0%, 100% { opacity: 0.06; }
+            50% { opacity: 0.11; }
+        }
+
+        @keyframes scratchRunA {
+            0%, 100% { left: 15%; opacity: 0; }
+            20% { left: 15%; opacity: 0.4; }
+            21% { left: 40%; opacity: 0; }
+            50% { left: 40%; opacity: 0.6; }
+            51% { left: 75%; opacity: 0; }
+            80% { left: 75%; opacity: 0.3; }
+            81% { left: 20%; opacity: 0; }
+        }
+
+        @keyframes scratchRunB {
+            0%, 100% { left: 85%; opacity: 0; }
+            15% { left: 85%; opacity: 0.5; }
+            16% { left: 30%; opacity: 0; }
+            45% { left: 30%; opacity: 0.3; }
+            46% { left: 60%; opacity: 0; }
+            70% { left: 60%; opacity: 0.7; }
+            71% { left: 50%; opacity: 0; }
         }
 
         #intro-screen {
@@ -159,7 +260,6 @@
             font-weight: 600;
             color: var(--text-sub);
             cursor: pointer;
-            transition: color 0.3s ease;
             position: relative;
             overflow: hidden;
             z-index: 1;
@@ -588,6 +688,12 @@
 </head>
 <body>
 
+    <div class="film-overlay">
+        <div class="film-grain"></div>
+        <div class="film-flicker"></div>
+        <div class="film-scratches"></div>
+    </div>
+
     <!-- 3-2-1 시네마 오프닝 레이어 -->
     <div id="intro-screen">
         <div class="curtain curtain-top"></div>
@@ -800,7 +906,6 @@
         // 1. Web Audio API를 활용한 '띠-' 소리 (Beep Sound) 생성 함수
         function playBeep(frequency = 650, duration = 0.15) {
             try {
-                // 사용자 제스처가 활성화되어 소리 엔진이 작동 가능한지 체크
                 if (!audioContext) {
                     audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 }
@@ -815,7 +920,6 @@
                 oscillator.type = 'sine'; // 부드러운 전파음 형태의 sine 파동 적용
                 oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
 
-                // 부드러운 볼륨 감소 설정
                 gainNode.gain.setValueAtTime(0.12, audioContext.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + duration);
 
